@@ -1,7 +1,29 @@
 import { Grid } from "@chakra-ui/react";
+import { useQuery } from "@tanstack/react-query";
+import { getRooms } from "../api";
 import Room from "../components/Room";
+import RoomSkeleton from "../components/RoomSkeleton";
+
+interface IPhoto {
+  pk: string;
+  file: string;
+  description: string;
+}
+
+interface IRoom {
+  pk: number;
+  name: string;
+  country: string;
+  city: string;
+  price: number;
+  rating: number;
+  is_owner: boolean;
+  photos: IPhoto[];
+}
 
 export default function Home() {
+  const { isLoading, data } = useQuery<IRoom[]>(["rooms"], getRooms);
+
   return (
     <Grid
       mt={10}
@@ -19,11 +41,18 @@ export default function Home() {
         "2xl": "repeat(5, 1fr)",
       }}
     >
-      {[
-        1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2, 3, 4,
-        5, 6, 7, 8, 9, 0,
-      ].map((index) => (
-        <Room key={index} />
+      {isLoading ? <RoomSkeleton /> : null}
+      {data?.map((room, index) => (
+        <Room
+          key={index}
+          pk={room.pk}
+          imageUrl={room.photos[0].file}
+          name={room.name}
+          rating={room.rating}
+          city={room.city}
+          country={room.country}
+          price={room.price}
+        />
       ))}
     </Grid>
   );
